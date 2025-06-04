@@ -116,16 +116,20 @@ def memo_detail_page() -> None:
     title = st.text_input('Title', value=memo['title'] if memo else '')
     body = st.text_area('Body', value=memo['body'] if memo else '', height=300)
     all_memos = list_memos(st.session_state.user['id'])
-    parent_options = {0: 'None', **{m['id']: m['title'] for m in all_memos if not memo or m['id'] != memo['id']}}
+    parent_options = {0: 'None', **{m['id']: m['title']
+                                    for m in all_memos if not memo or m['id'] != memo['id']}}
     parent_keys = list(parent_options.keys())
-    parent_index = parent_keys.index(memo['parent_id']) if memo and memo['parent_id'] in parent_keys else 0
-    parent_id = st.selectbox('Parent memo', parent_keys, index=parent_index, format_func=lambda x: parent_options[x])
+    parent_index = parent_keys.index(
+        memo['parent_id']) if memo and memo['parent_id'] in parent_keys else 0
+    parent_id = st.selectbox('Parent memo', parent_keys,
+                             index=parent_index, format_func=lambda x: parent_options[x])
     if st.button('Save'):
         if memo:
             update_memo(memo['id'], title, body, parent_id or None)
             st.success('Updated')
         else:
-            new_id = create_memo(st.session_state.user['id'], title, body, parent_id or None)
+            new_id = create_memo(
+                st.session_state.user['id'], title, body, parent_id or None)
             st.session_state.current_memo = new_id
             st.success('Created')
     if memo:
@@ -166,7 +170,7 @@ def offline_notice_page() -> None:
         check_online()
         if not st.session_state.offline:
             goto('memo_list')
-            st.experimental_rerun()
+            st.rerun()
     if st.button('Back'):
         goto('memo_list')
 
