@@ -22,7 +22,7 @@ def offline_banner():
         unsafe_allow_html=True,
     )
     if st.button('Sync'):
-        st.experimental_rerun()
+        st.rerun()
 
 
 def require_login():
@@ -41,12 +41,12 @@ def login_page():
         if user_id:
             st.session_state.user_id = user_id
             st.session_state.page = 'list'
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error('Invalid credentials')
     if st.button('Sign up'):
         st.session_state.page = 'signup'
-        st.experimental_rerun()
+        st.rerun()
 
 
 def signup_page():
@@ -58,12 +58,12 @@ def signup_page():
         if db.create_user(email, password):
             st.success('Account created. Please log in.')
             st.session_state.page = 'login'
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error('Email already registered')
     if st.button('Back to login'):
         st.session_state.page = 'login'
-        st.experimental_rerun()
+        st.rerun()
 
 
 def build_tree(memos):
@@ -97,15 +97,15 @@ def list_page():
         memo_id = db.create_memo(st.session_state.user_id, 'New Memo')
         st.session_state.page = 'detail'
         st.session_state.memo_id = memo_id
-        st.experimental_rerun()
+        st.rerun()
     search = st.text_input('Search')
     if st.button('Search'):
         st.session_state.search = search
         st.session_state.page = 'search'
-        st.experimental_rerun()
+        st.rerun()
     if st.button('Settings'):
         st.session_state.page = 'settings'
-        st.experimental_rerun()
+        st.rerun()
 
 
 def detail_page():
@@ -115,7 +115,7 @@ def detail_page():
     if not memo:
         st.error('Memo not found')
         st.session_state.page = 'list'
-        st.experimental_rerun()
+        st.rerun()
     memo_id, title, content, parent_id = memo
     st.title('Edit Memo')
     title_input = st.text_input('Title', value=title)
@@ -150,26 +150,27 @@ def detail_page():
         or content_input != st.session_state.last_saved['content']
         or parent_id_new != st.session_state.last_saved['parent_id']
     )
-    if changed:
-        db.update_memo(memo_id, title_input, content_input, parent_id_new)
-        st.session_state.last_saved = {
-            'memo_id': memo_id,
-            'title': title_input,
-            'content': content_input,
-            'parent_id': parent_id_new,
-        }
-        st.info('Auto-saved')
+    if title_input and content_input:
+        if changed:
+            db.update_memo(memo_id, title_input, content_input, parent_id_new)
+            st.session_state.last_saved = {
+                'memo_id': memo_id,
+                'title': title_input,
+                'content': content_input,
+                'parent_id': parent_id_new,
+            }
+            st.info('Auto-saved')
 
-    if st.button('Save'):
-        db.update_memo(memo_id, title_input, content_input, parent_id_new)
-        st.success('Saved')
+        if st.button('Save'):
+            db.update_memo(memo_id, title_input, content_input, parent_id_new)
+            st.success('Saved')
     if st.button('Delete'):
         db.delete_memo(memo_id)
         st.session_state.page = 'list'
-        st.experimental_rerun()
+        st.rerun()
     if st.button('Back'):
         st.session_state.page = 'list'
-        st.experimental_rerun()
+        st.rerun()
 
 
 def search_page():
@@ -182,7 +183,7 @@ def search_page():
         st.write(f"- [{title}](?memo_id={memo_id})")
     if st.button('Back'):
         st.session_state.page = 'list'
-        st.experimental_rerun()
+        st.rerun()
 
 
 def settings_page():
@@ -202,10 +203,10 @@ def settings_page():
     if st.button('Logout'):
         st.session_state.clear()
         st.session_state.page = 'login'
-        st.experimental_rerun()
+        st.rerun()
     if st.button('Back'):
         st.session_state.page = 'list'
-        st.experimental_rerun()
+        st.rerun()
 
 
 def main():
@@ -223,7 +224,7 @@ def main():
     elif page == 'detail':
         if 'memo_id' not in st.session_state:
             st.session_state.page = 'list'
-            st.experimental_rerun()
+            st.rerun()
         detail_page()
     elif page == 'search':
         search_page()
